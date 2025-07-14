@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title></title>
+
+</head>
+<style>
+h1 {color: rgb(0, 0, 0);}
+.centered_div {
+    width: 50%;
+    margin: 0 auto;
+    background-color: lightgray;
+    padding: 20px;
+}
+
+</style>
+<body>
+    <div style ="text-align: center;">
+        <h1>GPA CALCULATOR</h1>
+    </div>
+<form action="/submit_data" method="post" style="text-align: center;">
+
+    <br><br>
+    <label for="message">Current GPA:</label>
+    <input type="text" id="GPA" name="GPA" required><br><br>
+
+    <label for="message">Current earned credit hours:</label>
+    <input type="number" id="credit_hours" name="credit_hours" required><br><br>
+
+    <label for="message">New class credit hours:</label>
+    <input type="number" name="message" required><br><br>
+
+    <label for="message">New class letter grade:</label>
+    <input type="text" name="message" required><br><br>
+
+    <input type="submit" value="Add Class"><br><br>
+
+</form>
+
+<form action="/submit_more_data" method="post" style="text-align: center;">
+    
+    <br><br>
+    <label for="message">Enter # of credit hours to replace:</label>
+    <input type="number" name="message" required><br><br>
+
+    <label for="message">Enter replacement letter grade:</label>
+    <input type="text" name="message" required><br><br>
+
+
+    <label for="message">Check the box if you earned credit for the class(usually D or higher):</label>
+    <input type="checkbox" name="Check"><br><br>
+
+    <input type="submit" value="Replace Class"><br><br>
+
+</form>
+    
+</body>
+</html>
