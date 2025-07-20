@@ -1,2 +1,1 @@
-I could never find complete grade calculators online to find out how cooked I was. I couldn't find one that had a grade replacement function, so I made a low effort one.
-As you can see I put very little effort into design.
+
