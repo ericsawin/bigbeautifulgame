@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE BIG BEAUTIFUL GAME</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #e0e0e0;
+        }
+        header {
+            width: 90%;
+            text-align: center;
+            padding: 10px;
+            background-color: #e0e0e0;
+            color: red;
+        }
+        #gameArea {
+            width: 1600px;
+            height: 800px;
+            border: 2px solid black;
+            position: relative;
+            background-color: #f0f0f0;
+            overflow: hidden;
+            margin-left: 12px;
+            margin-right: 12px;
+            margin-top: 12px;
+        }
+        #player {
+            width: 120px;
+            height: 120px;
+            position: absolute;
+            bottom: 0;
+            left: 840px;
+        }
+        .falling-object, .bonus-object {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            top: 0;
+        }
+        #gameOver {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: red;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            color: black;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>THE BIG BEAUTIFUL GAME</h1>
+    </header>
+    <div id="gameArea">
+        <img id="player" src="unnamed.png" alt="Player Icon">
+        <div id="score">Score: 0</div>
+        <div id="gameOver">YOU'RE FIRED!</div>
+    </div>
+
+    <script>
+        const player = document.getElementById('player');
+        const gameArea = document.getElementById('gameArea');
+        const gameOverDiv = document.getElementById('gameOver');
+        const scoreDiv = document.getElementById('score');
+        const speed = 10; // Player movement speed
+        const objectSpeed = 5; // Falling object speed
+        let playerX = parseInt(player.style.left) || 840;
+        let keys = { ArrowLeft: false, ArrowRight: false };
+        let gameActive = true;
+        let score = 0;
+        let objects = [];
+
+        // Five harmful objects and one bonus object
+        const objectImages = [
+            'Kamala.png',
+            'List.jpg',
+            'mexicoflag.png',
+            'sleepyjoe.png',
+            'affordable-care-act2.jpg'
+        ];
+        const bonusImage = 'Dietcoke.jpg';
+
+        // Handle key presses
+        document.addEventListener('keydown', (event) => {
+            if (gameActive && event.key in keys) {
+                keys[event.key] = true;
+                console.log('Key pressed:', event.key);
+            }
+        });
+        document.addEventListener('keyup', (event) => {
+            if (event.key in keys) keys[event.key] = false;
+        });
+
+        // Spawn harmful objects
+        function spawnHarmfulObject() {
+            if (!gameActive) return;
+            const x = Math.floor(Math.random() * (gameArea.offsetWidth - 100));
+            const imageSrc = objectImages[Math.floor(Math.random() * objectImages.length)];
+            const object = document.createElement('img');
+            object.src = imageSrc;
+            object.className = 'falling-object';
+            object.style.left = x + 'px';
+            object.style.top = '0px';
+            gameArea.appendChild(object);
+            objects.push({ element: object, x: x, y: 0, isBonus: false });
+        }
+
+        // Spawn bonus object
+        function spawnBonusObject() {
+            if (!gameActive) return;
+            const x = Math.floor(Math.random() * (gameArea.offsetWidth - 100));
+            const object = document.createElement('img');
+            object.src = bonusImage;
+            object.className = 'bonus-object';
+            object.style.left = x + 'px';
+            object.style.top = '0px';
+            gameArea.appendChild(object);
+            objects.push({ element: object, x: x, y: 0, isBonus: true });
+        }
+
+        // Check for collisions
+        function checkCollision(playerRect, objectRect) {
+            return playerRect.left < objectRect.right &&
+                   playerRect.right > objectRect.left &&
+                   playerRect.top < objectRect.bottom &&
+                   playerRect.bottom > objectRect.top;
+        }
+
+        // Game loop
+        function update() {
+            if (!gameActive) return;
+
+            // Move player
+            if (keys.ArrowLeft) playerX -= speed;
+            if (keys.ArrowRight) playerX += speed;
+            const gameWidth = gameArea.offsetWidth;
+            const playerWidth = player.offsetWidth;
+            playerX = Math.max(0, Math.min(playerX, gameWidth - playerWidth));
+            player.style.left = playerX + 'px';
+
+            // Move objects
+            objects.forEach((obj, index) => {
+                obj.y += objectSpeed;
+                obj.element.style.top = obj.y + 'px';
+                if (obj.y > gameArea.offsetHeight) {
+                    obj.element.remove();
+                    objects.splice(index, 1);
+                }
+            });
+
+            // Check collisions
+            const playerRect = player.getBoundingClientRect();
+            objects.forEach((obj, index) => {
+                const objRect = obj.element.getBoundingClientRect();
+                if (checkCollision(playerRect, objRect)) {
+                    if (obj.isBonus) {
+                        score += 1;
+                        scoreDiv.textContent = `Score: ${score}`;
+                        obj.element.remove();
+                        objects.splice(index, 1);
+                        console.log('Bonus collected! Score:', score);
+                    } else {
+                        gameActive = false;
+                        gameOverDiv.style.display = 'block';
+                        console.log('Game Over: Collision with harmful object');
+                    }
+                }
+            });
+
+            // Spawn new objects randomly
+            if (Math.random() < 0.02) spawnHarmfulObject();
+            if (Math.random() < 0.005) spawnBonusObject();
+
+            requestAnimationFrame(update);
+        }
+
+        // Start spawning objects
+        setInterval(spawnHarmfulObject, 2000); // Harmful every 2s
+        setInterval(spawnBonusObject, 5000); // Bonus every 5s
+        update(); // Start game loop
+    </script>
+</body>
+</html>
